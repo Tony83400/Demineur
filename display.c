@@ -11,11 +11,22 @@ des qu'une evenement survient */
 
 void gestionEvenement(EvenementGfx evenement)
 {
+
+	static int difficulty = 2;
+	static int tab[3] = {18, 45, 100};
+	static int nbFlag = 0;
+	static int *ptFlag = &nbFlag;
+
 	static cell plateau[LONGUEUR][LARGEUR];
 	static bool initialisationFaite = false;
 	if (!initialisationFaite)
 	{
-		initImage(plateau, 0);
+		nbFlag = tab[difficulty];
+		initTab(plateau, 3, 7, difficulty,nbFlag);
+		initNumber(plateau, difficulty);
+		initImage(plateau, difficulty);
+		afficheTab(plateau, difficulty);
+		printf("%d\n", nbBombe(plateau));
 		initialisationFaite = true;
 	}
 
@@ -26,8 +37,8 @@ void gestionEvenement(EvenementGfx evenement)
 
 		// Configure le systeme pour generer un message Temporisation
 		// toutes les 20 millisecondes
-		coo CordClick = {-1, -1};
-		coo *ptCordClick = &CordClick;
+		static coo CordClick = {-1, -1};
+		static coo *ptCordClick = &CordClick;
 
 		demandeTemporisation(20);
 		break;
@@ -42,7 +53,8 @@ void gestionEvenement(EvenementGfx evenement)
 		effaceFenetre(255, 255, 255);
 		couleurCourante(255, 0, 0);
 		// rectangle(largeurFenetre() / 3, hauteurFenetre() - GAP, largeurFenetre() * 2 / 3, GAP);
-		quadrillage(plateau, 0);
+		quadrillage(plateau, difficulty);
+
 		cercle(abscisseSouris(), ordonneeSouris(), 1);
 
 		break;
@@ -70,6 +82,7 @@ void gestionEvenement(EvenementGfx evenement)
 
 	case ClavierSpecial:
 		printf("ASCII %d\n", toucheClavier());
+
 		break;
 
 	case BoutonSouris:
@@ -78,12 +91,30 @@ void gestionEvenement(EvenementGfx evenement)
 		case GaucheAppuye:
 			printf("Bouton gauche appuye en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
 			couleurCourante(0, 255, 0);
-			targetMouse(ptCordClick, 10, 15);
+			if (targetMouse(ptCordClick, difficulty))
+			{
+				if (plateau[CordClick.x][CordClick.y].flag == 0)
+				{
+					if (plateau[CordClick.x][CordClick.y].bomb == 0)
+					{
+						revealer(plateau,CordClick.x,CordClick.y,difficulty);
+					}
+				}
+			}
+			else{
+				printf("pas dedans \n");
+			}
 			break;
 		case GaucheRelache:
 			printf("Bouton gauche relache en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
 			break;
 		case DroiteAppuye:
+			couleurCourante(0, 0, 255);
+			if (targetMouse(ptCordClick, difficulty))
+			{
+				flager(plateau, CordClick.x, CordClick.y, difficulty, ptFlag);
+			}
+			break;
 		case DroiteRelache:
 			puts("Bouton droite");
 			break;
@@ -138,10 +169,10 @@ void cercle(float centreX, float centreY, float rayon)
 
 void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty)
 {
-	// int nbColonne = 10 + difficulty * 5, nbLigne = 15 + difficulty * 5;
-	for (int y = 1; y < LONGUEUR - 1; y++)
+	int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+	for (int y = 1; y < nbLigne - 1; y++)
 	{
-		for (int x = 1; x < LARGEUR - 1; x++)
+		for (int x = 1; x < nbColonne - 1; x++)
 		{
 			plateau[y][x].imageDepart = lisBMPRGB("../images/vide.bmp");
 
@@ -181,33 +212,36 @@ void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty)
 			{
 				plateau[y][x].image = lisBMPRGB("../images/bomb.bmp");
 			}
+
+			if (plateau[y][x].image == NULL)
+			{
+				printf("Erreur: échec du chargement de l'image pour plateau[%d][%d]\n", y, x);
+				continue;
+			}
+			if (plateau[y][x].imageDepart == NULL)
+			{
+				printf("Erreur: échec du chargement de l'imageDepart pour plateau[%d][%d]\n", y, x);
+				continue;
+			}
 		}
 	}
 }
 
-void quadrillage(cell plateau[LONGUEUR][LARGEUR], int diffculty)
+void quadrillage(cell plateau[LONGUEUR][LARGEUR], int difficulty)
 {
-	int nbColonne = 10 + diffculty * 5, nbLigne = 15 + diffculty * 5;
-	for (int i = 0; i < LONGUEUR - 2; i++)
+	int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+	// printf("col : %d , ligne : %d \n",nbColonne,nbLigne);
+	for (int i = 1; i < nbLigne - 1; i++)
 	{
-		for (int j = 0; j < LARGEUR - 2; j++)
+		for (int j = 1; j < nbColonne - 1; j++)
 		{
-			if (plateau[i + 1][j + 1].flag == 1)
+			if (plateau[i][j].revealed == 0)
 			{
-				plateau[i + 1][j + 1].image = lisBMPRGB("../images/flag.bmp");
+				ecrisImage(largeurFenetre() / 2 - (COTE_IMAGE * nbColonne) / 2 + COTE_IMAGE * j, hauteurFenetre() / 2 - (COTE_IMAGE * nbLigne) / 2 + COTE_IMAGE * i, COTE_IMAGE, COTE_IMAGE, plateau[i][j].imageDepart->donneesRGB);
 			}
 			else
 			{
-				plateau[i + 1][j + 1].image = lisBMPRGB("../images/vide.bmp");
-			}
-
-			if (plateau[i + 1][j + 1].revealed == 0)
-			{
-				ecrisImage(largeurFenetre() / 2 - (COTE_IMAGE * nbColonne) / 2 + COTE_IMAGE * j, hauteurFenetre() / 2 - (COTE_IMAGE * nbLigne) / 2 + COTE_IMAGE * i, COTE_IMAGE, COTE_IMAGE, plateau[i + 1][j + 1].imageDepart->donneesRGB);
-			}
-			else
-			{
-				ecrisImage(largeurFenetre() / 2 - (COTE_IMAGE * nbColonne) / 2 + COTE_IMAGE * j, hauteurFenetre() / 2 - (COTE_IMAGE * nbLigne) / 2 + COTE_IMAGE * i, COTE_IMAGE, COTE_IMAGE, plateau[i + 1][j + 1].image->donneesRGB);
+				ecrisImage(largeurFenetre() / 2 - (COTE_IMAGE * nbColonne) / 2 + COTE_IMAGE * j, hauteurFenetre() / 2 - (COTE_IMAGE * nbLigne) / 2 + COTE_IMAGE * i, COTE_IMAGE, COTE_IMAGE, plateau[i][j].image->donneesRGB);
 			}
 		}
 	}
