@@ -1,31 +1,27 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <stdlib.h>		   // Pour pouvoir utiliser exit()
-#include <stdio.h>		   // Pour pouvoir utiliser printf()
-#include <math.h>		   // Pour pouvoir utiliser sin() et cos()
+#include <stdlib.h>        // Pour pouvoir utiliser exit()
+#include <stdio.h>         // Pour pouvoir utiliser printf()
+#include <math.h>          // Pour pouvoir utiliser sin() et cos()
 #include "GFXlib/GfxLib.h" // Seul cet include est necessaire pour faire du graphique
 #include "GFXlib/BmpLib.h" // Cet include permet de manipuler des fichiers BMP
 #include "GFXlib/ESLib.h"  // Pour utiliser valeurAleatoire()
 #include "Fonction.h"
 
-void initTab(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficult)
+void initTab(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty, int nbBomb)
 {
-    // tab = malloc(sizeof(*cell)*10)
-    // for (int i = 0; i < 15; i++)
-    // {
-    //     tab[i] = malloc(sizeof(cell)*15);
-    // }
+    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
     int xr;
     int yr;
-    for (int i = 1; i < LONGUEUR - 1; i++)
+    for (int i = 1; i < nbLigne - 1; i++)
     {
-        for (int j = 1; j < LARGEUR - 1; j++)
+        for (int j = 1; j < nbColonne - 1; j++)
         {
             tab[i][j].bomb = 0;
         }
     }
-    for (int k = 1; k < difficult + 1; k++)
+    for (int k = 1; k <= nbBomb; k++)
     {
         xr = rand() % 14 + 1;
         yr = rand() % 9 + 1;
@@ -50,16 +46,14 @@ void initTab(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficult)
     tab[x + 1][y + 1].bomb = 0;
 }
 
-void afficheTab(cell tab[LONGUEUR][LARGEUR], int x, int y)
+void afficheTab(cell tab[LONGUEUR][LARGEUR], int difficulty)
 {
-    for (int i = 1; i < LONGUEUR - 1; i++)
+    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+    for (int i = 1; i < nbLigne - 1; i++)
     {
-        for (int j = 1; j < LARGEUR - 1; j++)
+        for (int j = 1; j < nbColonne - 1; j++)
         {
-            // if (i == x && j == y)
-            //{
-            //	printf(" %2d ", 50);
-            // }
+
             if (tab[i][j].bomb == 1)
             {
                 printf(" %2d ", -1);
@@ -109,15 +103,15 @@ int verifVoisin(cell tab[LONGUEUR][LARGEUR], int x, int y)
     {
         voisin = voisin + 1;
     }
-
     return voisin;
 }
 
-void initNumber(cell tab[LONGUEUR][LARGEUR])
+void initNumber(cell tab[LONGUEUR][LARGEUR], int difficulty)
 {
-    for (int i = 1; i < LONGUEUR - 1; i++)
+    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+    for (int i = 1; i < nbLigne - 1; i++)
     {
-        for (int j = 1; j < LARGEUR - 1; j++)
+        for (int j = 1; j < nbColonne - 1; j++)
         {
             tab[i][j].number = verifVoisin(tab, i, j);
         }
@@ -164,8 +158,115 @@ int aPerdu(cell tab[LONGUEUR][LARGEUR], int x, int y)
     return 0;
 }
 
-void flager(cell tab[LONGUEUR][LARGEUR], int x, int y)
+void flager(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty, int *nbFlag)
 {
-    tab[x][y].flag = 1;
+    int nbLigne = 15 + difficulty * 5 + 1;
+    x = nbLigne - x;
+    if (tab[x][y].flag == 0)
+    {
+        tab[x][y].flag = 1;
+        tab[x][y].imageDepart = lisBMPRGB("../images/flag.bmp");
+        *nbFlag = *nbFlag - 1;
+    }
+    else
+    {
+        tab[x][y].flag = 0;
+        tab[x][y].imageDepart = lisBMPRGB("../images/vide.bmp");
+        *nbFlag = *nbFlag + 1;
+    }
 }
 
+void copieList(coo tab1[LARGEUR * LONGUEUR], coo tab2[LARGEUR * LONGUEUR], int difficulty)
+{
+    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+    for (int i = 0; i < nbColonne * nbLigne; i++)
+    {
+        tab1[i] = tab2[i];
+    }
+}
+
+void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
+{
+    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+    x = nbLigne - 1 - x;
+    tab[x][y].revealed = 1;
+    coo tab1[nbLigne * nbColonne];
+    tab1[0].x = x;
+    tab1[0].y = y;
+    int nbrVoisin = 1;
+
+    while (nbrVoisin > 0)
+    {
+        coo tab2[nbLigne * nbColonne];
+        int indice = 0;
+
+        for (int i = 0; i < nbrVoisin; i++)
+        {
+            int cx = tab1[i].x;
+            int cy = tab1[i].y;
+
+            if (tab[cx][cy].number == 0)
+            {
+                if (cx - 1 > 0 && cy - 1 > 0 && tab[cx - 1][cy - 1].revealed == 0)
+                {
+                    tab[cx - 1][cy - 1].revealed = 1;
+                    tab2[indice].x = cx - 1;
+                    tab2[indice].y = cy - 1;
+                    indice++;
+                }
+                if (cy - 1 > 0 && tab[cx][cy - 1].revealed == 0)
+                {
+                    tab[cx][cy - 1].revealed = 1;
+                    tab2[indice].x = cx;
+                    tab2[indice].y = cy - 1;
+                    indice++;
+                }
+                if (cx + 1 < nbLigne - 1 && cy - 1 > 0 && tab[cx + 1][cy - 1].revealed == 0)
+                {
+                    tab[cx + 1][cy - 1].revealed = 1;
+                    tab2[indice].x = cx + 1;
+                    tab2[indice].y = cy - 1;
+                    indice++;
+                }
+                if (cx - 1 > 0 && tab[cx - 1][cy].revealed == 0)
+                {
+                    tab[cx - 1][cy].revealed = 1;
+                    tab2[indice].x = cx - 1;
+                    tab2[indice].y = cy;
+                    indice++;
+                }
+                if (cx + 1 < nbLigne - 1 && tab[cx + 1][cy].revealed == 0)
+                {
+                    tab[cx + 1][cy].revealed = 1;
+                    tab2[indice].x = cx + 1;
+                    tab2[indice].y = cy;
+                    indice++;
+                }
+                if (cx - 1 > 0 && cy + 1 < nbColonne - 1 && tab[cx - 1][cy + 1].revealed == 0)
+                {
+                    tab[cx - 1][cy + 1].revealed = 1;
+                    tab2[indice].x = cx - 1;
+                    tab2[indice].y = cy + 1;
+                    indice++;
+                }
+                if (cy + 1 < nbColonne - 1 && tab[cx][cy + 1].revealed == 0)
+                {
+                    tab[cx][cy + 1].revealed = 1;
+                    tab2[indice].x = cx;
+                    tab2[indice].y = cy + 1;
+                    indice++;
+                }
+                if (cx + 1 < nbLigne - 1 && cy + 1 < nbColonne - 1 && tab[cx + 1][cy + 1].revealed == 0)
+                {
+                    tab[cx + 1][cy + 1].revealed = 1;
+                    tab2[indice].x = cx + 1;
+                    tab2[indice].y = cy + 1;
+                    indice++;
+                }
+            }
+        }
+
+        nbrVoisin = indice;
+        copieList(tab1, tab2, difficulty);
+    }
+}
