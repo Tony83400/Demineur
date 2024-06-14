@@ -20,6 +20,7 @@ void gestionEvenement(EvenementGfx evenement);
 
 int main(int argc, char **argv)
 {
+	srand(time(NULL));
 	initialiseGfx(argc, argv);
 	
 	prepareFenetreGraphique("OpenGL", LargeurFenetre, HauteurFenetre);
