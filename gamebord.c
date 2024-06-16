@@ -33,8 +33,8 @@ void initBomb(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty, int nbB
 
     for (int k = 1; k <= nbBomb; k++)
     {
-        xr = rand() % (nbLigne - 1) + 1;
-        yr = rand() % (nbColonne - 1) + 1;
+        xr = rand() % (nbLigne - 2) + 1;
+        yr = rand() % (nbColonne - 2) + 1;
         if ((xr >= x - 1 && xr <= x + 1 && yr >= y - 1 && yr <= y + 1) || tab[xr][yr].bomb == 1)
         {
             k = k - 1;
@@ -135,12 +135,14 @@ void initNumber(cell tab[LONGUEUR][LARGEUR], int difficulty)
     }
 }
 
-int nbBombe(cell tab[LONGUEUR][LARGEUR])
+int nbBombe(cell tab[LONGUEUR][LARGEUR], int difficulty)
 {
+    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+
     int nbBombe = 0;
-    for (int i = 1; i < LONGUEUR - 1; i++)
+    for (int i = 1; i < nbLigne - 1; i++)
     {
-        for (int j = 1; j < LARGEUR - 1; j++)
+        for (int j = 1; j < nbColonne - 1; j++)
         {
             if (tab[i][j].bomb == 1)
             {
@@ -303,6 +305,7 @@ void revealBomb(cell tab[LONGUEUR][LARGEUR], int difficulty)
             if (tab[i][j].bomb == 1)
             {
                 tab[i][j].revealed = 1;
+                tab[i][j].flag = 0;
             }
         }
     }
