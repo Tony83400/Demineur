@@ -13,7 +13,7 @@ bool targetMouse(coo *coord, int difficulty)
     if (abscisseSouris() > largeurFenetre() / 2 - (COTE_IMAGE * nbColonne) / 2 && abscisseSouris() < largeurFenetre() / 2 + (COTE_IMAGE * nbColonne) / 2 && ordonneeSouris() > hauteurFenetre() / 2 - (COTE_IMAGE * nbLigne) / 2 && ordonneeSouris() < hauteurFenetre() / 2 + (COTE_IMAGE * nbLigne) / 2)
     {
         coord->y = ((abscisseSouris() - (largeurFenetre() / 2 - (COTE_IMAGE * nbColonne) / 2)) / COTE_IMAGE) + 1;
-        coord->x = nbLigne - ((ordonneeSouris() - (hauteurFenetre() / 2 - (COTE_IMAGE * nbLigne) / 2)) / COTE_IMAGE);
+        coord->x = ((ordonneeSouris() - (hauteurFenetre() / 2 - (COTE_IMAGE * nbLigne) / 2)) / COTE_IMAGE)+1;
         // printf("target : x : %d y : %d \n", coord->x, coord->y);
         return true;
     }
