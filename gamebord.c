@@ -9,23 +9,33 @@
 #include "GFXlib/ESLib.h"  // Pour utiliser valeurAleatoire()
 #include "Fonction.h"
 
-void initTab(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty, int nbBomb)
+void initTab(cell tab[LONGUEUR][LARGEUR], int difficulty)
 {
     int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
-    int xr;
-    int yr;
+
     for (int i = 1; i < nbLigne - 1; i++)
     {
         for (int j = 1; j < nbColonne - 1; j++)
         {
             tab[i][j].bomb = 0;
+            tab[i][j].flag = 0;
+            tab[i][j].number = 0;
+            tab[i][j].revealed = 0;
         }
     }
+}
+
+void initBomb(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty, int nbBomb)
+{
+    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+    int xr;
+    int yr;
+
     for (int k = 1; k <= nbBomb; k++)
     {
-        xr = rand() % 14 + 1;
-        yr = rand() % 9 + 1;
-        if (xr >= x - 1 && xr <= x + 1 && yr >= y - 1 && yr <= y + 1 || tab[xr][yr].bomb == 1)
+        xr = rand() % (nbLigne - 1) + 1;
+        yr = rand() % (nbColonne - 1) + 1;
+        if ((xr >= x - 1 && xr <= x + 1 && yr >= y - 1 && yr <= y + 1) || tab[xr][yr].bomb == 1)
         {
             k = k - 1;
         }
@@ -113,7 +123,14 @@ void initNumber(cell tab[LONGUEUR][LARGEUR], int difficulty)
     {
         for (int j = 1; j < nbColonne - 1; j++)
         {
-            tab[i][j].number = verifVoisin(tab, i, j);
+            if (tab[i][j].bomb == 0)
+            {
+                tab[i][j].number = verifVoisin(tab, i, j);
+            }
+            else
+            {
+                tab[i][j].number = -1;
+            }
         }
     }
 }
@@ -158,10 +175,8 @@ int aPerdu(cell tab[LONGUEUR][LARGEUR], int x, int y)
     return 0;
 }
 
-void flager(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty, int *nbFlag)
+void flager(cell tab[LONGUEUR][LARGEUR], int x, int y, int *nbFlag)
 {
-    int nbLigne = 15 + difficulty * 5 + 1;
-    x = nbLigne - x;
     if (tab[x][y].flag == 0)
     {
         tab[x][y].flag = 1;
@@ -188,7 +203,6 @@ void copieList(coo tab1[LARGEUR * LONGUEUR], coo tab2[LARGEUR * LONGUEUR], int d
 void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
 {
     int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
-    x = nbLigne - 1 - x;
     tab[x][y].revealed = 1;
     coo tab1[nbLigne * nbColonne];
     tab1[0].x = x;
@@ -269,4 +283,32 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
         nbrVoisin = indice;
         copieList(tab1, tab2, difficulty);
     }
+}
+void infoCase(cell tab[LONGUEUR][LARGEUR], int x, int y)
+{
+    printf("x : %d , y : %d \n", x, y);
+    printf("Nombre : %d \n", tab[x][y].number);
+    printf("Bombe : %d \n", tab[x][y].bomb);
+    printf("Drapeau : %d \n", tab[x][y].flag);
+    printf("Reveal : %d \n", tab[x][y].revealed);
+}
+
+void revealBomb(cell tab[LONGUEUR][LARGEUR], int difficulty)
+{
+    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+    for (int i = 0; i < nbLigne; i++)
+    {
+        for (int j = 0; j < nbColonne; j++)
+        {
+            if (tab[i][j].bomb == 1)
+            {
+                tab[i][j].revealed = 1;
+            }
+        }
+    }
+}
+void explosion(cell tab[LONGUEUR][LARGEUR], int difficulty, int x, int y)
+{
+    tab[x][y].image = lisBMPRGB("../images/boom.bmp");
+    tab[x][y].revealed = 1;
 }
