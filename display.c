@@ -13,20 +13,19 @@ void gestionEvenement(EvenementGfx evenement)
 {
 
 	static int difficulty = 2;
-	static int tab[3] = {18, 45, 100};
+	static int tab_difficulty[3] = {18, 45, 100};
 	static int nbFlag = 0;
 	static int *ptFlag = &nbFlag;
+	static bool aPerdu = false, premierClique = false;
 
 	static cell plateau[LONGUEUR][LARGEUR];
 	static bool initialisationFaite = false;
 	if (!initialisationFaite)
 	{
-		nbFlag = tab[difficulty];
-		initTab(plateau, 3, 7, difficulty,nbFlag);
-		initNumber(plateau, difficulty);
+		nbFlag = tab_difficulty[difficulty];
+		initTab(plateau, difficulty);
 		initImage(plateau, difficulty);
 		afficheTab(plateau, difficulty);
-		printf("%d\n", nbBombe(plateau));
 		initialisationFaite = true;
 	}
 
@@ -52,10 +51,8 @@ void gestionEvenement(EvenementGfx evenement)
 		// On part d'un fond d'ecran blanc
 		effaceFenetre(255, 255, 255);
 		couleurCourante(255, 0, 0);
-		// rectangle(largeurFenetre() / 3, hauteurFenetre() - GAP, largeurFenetre() * 2 / 3, GAP);
-		quadrillage(plateau, difficulty);
 
-		cercle(abscisseSouris(), ordonneeSouris(), 1);
+		quadrillage(plateau, difficulty);
 
 		break;
 
@@ -91,17 +88,40 @@ void gestionEvenement(EvenementGfx evenement)
 		case GaucheAppuye:
 			printf("Bouton gauche appuye en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
 			couleurCourante(0, 255, 0);
-			if (targetMouse(ptCordClick, difficulty))
+
+			if (targetMouse(ptCordClick, difficulty) && !aPerdu)
 			{
+				if (!premierClique)
+				{
+					initBomb(plateau,CordClick.x,CordClick.y,difficulty,nbFlag);
+					initNumber(plateau, difficulty);
+					initImage(plateau, difficulty);
+					afficheTab(plateau, difficulty);
+					printf("%d\n", nbBombe(plateau));
+					premierClique = true;
+				}
+
+				infoCase(plateau, CordClick.x, CordClick.y);
 				if (plateau[CordClick.x][CordClick.y].flag == 0)
 				{
 					if (plateau[CordClick.x][CordClick.y].bomb == 0)
 					{
-						revealer(plateau,CordClick.x,CordClick.y,difficulty);
+						revealer(plateau, CordClick.x, CordClick.y, difficulty);
+					}
+					else
+					{
+						aPerdu = true;
+						explosion(plateau, difficulty, CordClick.x, CordClick.y);
+						revealBomb(plateau, difficulty);
 					}
 				}
+				else
+				{
+					printf("Clique sur drapeau \n");
+				}
 			}
-			else{
+			else
+			{
 				printf("pas dedans \n");
 			}
 			break;
@@ -110,9 +130,9 @@ void gestionEvenement(EvenementGfx evenement)
 			break;
 		case DroiteAppuye:
 			couleurCourante(0, 0, 255);
-			if (targetMouse(ptCordClick, difficulty))
+			if (targetMouse(ptCordClick, difficulty) && !aPerdu)
 			{
-				flager(plateau, CordClick.x, CordClick.y, difficulty, ptFlag);
+				flager(plateau, CordClick.x, CordClick.y, ptFlag);
 			}
 			break;
 		case DroiteRelache:
@@ -148,22 +168,6 @@ void gestionEvenement(EvenementGfx evenement)
 		printf("Largeur : %d\t", largeurFenetre());
 		printf("Hauteur : %d\n", hauteurFenetre());
 		break;
-	}
-}
-
-void cercle(float centreX, float centreY, float rayon)
-{
-	const int Pas = 20; // Nombre de secteurs pour tracer le cercle
-	const double PasAngulaire = 2. * M_PI / Pas;
-	int index;
-
-	for (index = 0; index < Pas; ++index) // Pour chaque secteur
-	{
-		const double angle = 2. * M_PI * index / Pas; // on calcule l'angle de depart du secteur
-		triangle(centreX, centreY,
-				 centreX + rayon * cos(angle), centreY + rayon * sin(angle),
-				 centreX + rayon * cos(angle + PasAngulaire), centreY + rayon * sin(angle + PasAngulaire));
-		// On trace le secteur a l'aide d'un triangle => approximation d'un cercle
 	}
 }
 
@@ -230,7 +234,6 @@ void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty)
 void quadrillage(cell plateau[LONGUEUR][LARGEUR], int difficulty)
 {
 	int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
-	// printf("col : %d , ligne : %d \n",nbColonne,nbLigne);
 	for (int i = 1; i < nbLigne - 1; i++)
 	{
 		for (int j = 1; j < nbColonne - 1; j++)
