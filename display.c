@@ -12,20 +12,18 @@ des qu'une evenement survient */
 void gestionEvenement(EvenementGfx evenement)
 {
 
-	static int difficulty = 2;
+	static int difficulty = 1, nbFlag = 0;
 	static int tab_difficulty[3] = {18, 45, 100};
-	static int nbFlag = 0;
 	static int *ptFlag = &nbFlag;
-	static bool aPerdu = false, premierClique = false;
+	static bool aPerdu = false, premierClique = false, initialisationFaite = false;
 
 	static cell plateau[LONGUEUR][LARGEUR];
-	static bool initialisationFaite = false;
 	if (!initialisationFaite)
 	{
 		nbFlag = tab_difficulty[difficulty];
 		initTab(plateau, difficulty);
 		initImage(plateau, difficulty);
-		afficheTab(plateau, difficulty);
+		// afficheTab(plateau, difficulty);
 		initialisationFaite = true;
 	}
 
@@ -50,14 +48,13 @@ void gestionEvenement(EvenementGfx evenement)
 
 		// On part d'un fond d'ecran blanc
 		effaceFenetre(255, 255, 255);
-		couleurCourante(255, 0, 0);
 
 		quadrillage(plateau, difficulty);
 
 		break;
 
 	case Clavier:
-		printf("%c : ASCII %d\n", caractereClavier(), caractereClavier());
+		// printf("%c : ASCII %d\n", caractereClavier(), caractereClavier());
 
 		switch (caractereClavier())
 		{
@@ -78,7 +75,7 @@ void gestionEvenement(EvenementGfx evenement)
 		break;
 
 	case ClavierSpecial:
-		printf("ASCII %d\n", toucheClavier());
+		// printf("ASCII %d\n", toucheClavier());
 
 		break;
 
@@ -86,22 +83,22 @@ void gestionEvenement(EvenementGfx evenement)
 		switch (etatBoutonSouris())
 		{
 		case GaucheAppuye:
-			printf("Bouton gauche appuye en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
+			// printf("Bouton gauche appuye en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
 			couleurCourante(0, 255, 0);
 
 			if (targetMouse(ptCordClick, difficulty) && !aPerdu)
 			{
 				if (!premierClique)
 				{
-					initBomb(plateau,CordClick.x,CordClick.y,difficulty,nbFlag);
+					initBomb(plateau, CordClick.x, CordClick.y, difficulty, nbFlag);
 					initNumber(plateau, difficulty);
 					initImage(plateau, difficulty);
 					afficheTab(plateau, difficulty);
-					printf("%d\n", nbBombe(plateau));
+					printf("nombre de bombe : %d\n", nbBombe(plateau,difficulty));
 					premierClique = true;
 				}
 
-				infoCase(plateau, CordClick.x, CordClick.y);
+				// infoCase(plateau, CordClick.x, CordClick.y);
 				if (plateau[CordClick.x][CordClick.y].flag == 0)
 				{
 					if (plateau[CordClick.x][CordClick.y].bomb == 0)
@@ -126,7 +123,7 @@ void gestionEvenement(EvenementGfx evenement)
 			}
 			break;
 		case GaucheRelache:
-			printf("Bouton gauche relache en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
+			// printf("Bouton gauche relache en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
 			break;
 		case DroiteAppuye:
 			couleurCourante(0, 0, 255);
@@ -136,7 +133,7 @@ void gestionEvenement(EvenementGfx evenement)
 			}
 			break;
 		case DroiteRelache:
-			puts("Bouton droite");
+			// puts("Bouton droite");
 			break;
 		case MilieuAppuye:
 		case MilieuRelache:
