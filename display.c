@@ -12,7 +12,7 @@ des qu'une evenement survient */
 void gestionEvenement(EvenementGfx evenement)
 {
 
-	static int difficulty = 1, nbFlag = 0;
+	static int difficulty = 0, nbFlag = 0, tailleImage = 32;
 	static int tab_difficulty[3] = {18, 45, 100};
 	static int *ptFlag = &nbFlag;
 	static bool aPerdu = false, premierClique = false, initialisationFaite = false;
@@ -22,7 +22,7 @@ void gestionEvenement(EvenementGfx evenement)
 	{
 		nbFlag = tab_difficulty[difficulty];
 		initTab(plateau, difficulty);
-		initImage(plateau, difficulty);
+		initImage(plateau, difficulty, tailleImage);
 		// afficheTab(plateau, difficulty);
 		initialisationFaite = true;
 	}
@@ -48,8 +48,16 @@ void gestionEvenement(EvenementGfx evenement)
 
 		// On part d'un fond d'ecran blanc
 		effaceFenetre(255, 255, 255);
-
-		quadrillage(plateau, difficulty);
+		if (COTE_IMAGE * (15 + difficulty * 5) > hauteurFenetre())
+		{
+			tailleImage = 16;
+		}
+		else
+		{
+			tailleImage = 32;
+		}
+		initImage(plateau, difficulty, tailleImage);
+		quadrillage(plateau, difficulty, tailleImage);
 
 		break;
 
@@ -86,15 +94,15 @@ void gestionEvenement(EvenementGfx evenement)
 			// printf("Bouton gauche appuye en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
 			couleurCourante(0, 255, 0);
 
-			if (targetMouse(ptCordClick, difficulty) && !aPerdu)
+			if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu)
 			{
 				if (!premierClique)
 				{
 					initBomb(plateau, CordClick.x, CordClick.y, difficulty, nbFlag);
 					initNumber(plateau, difficulty);
-					initImage(plateau, difficulty);
+					initImage(plateau, difficulty, tailleImage);
 					afficheTab(plateau, difficulty);
-					printf("nombre de bombe : %d\n", nbBombe(plateau,difficulty));
+					printf("nombre de bombe : %d\n", nbBombe(plateau, difficulty));
 					premierClique = true;
 				}
 
@@ -127,9 +135,10 @@ void gestionEvenement(EvenementGfx evenement)
 			break;
 		case DroiteAppuye:
 			couleurCourante(0, 0, 255);
-			if (targetMouse(ptCordClick, difficulty) && !aPerdu)
+			if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu)
 			{
-				flager(plateau, CordClick.x, CordClick.y, ptFlag);
+				flager(plateau, CordClick.x, CordClick.y, ptFlag, tailleImage);
+				printf(" nb drapeau : %d \n", nbFlag);
 			}
 			break;
 		case DroiteRelache:
@@ -168,67 +177,113 @@ void gestionEvenement(EvenementGfx evenement)
 	}
 }
 
-void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty)
+void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage)
 {
 	int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
 	for (int y = 1; y < nbLigne - 1; y++)
 	{
 		for (int x = 1; x < nbColonne - 1; x++)
 		{
-			plateau[y][x].imageDepart = lisBMPRGB("../images/vide.bmp");
+			if (tailleImage == 32)
+			{
+				if (plateau[y][x].flag == 1)
+				{
+					plateau[y][x].imageDepart = lisBMPRGB("../images/flag.bmp");
+				}
+				else
+				{
+					plateau[y][x].imageDepart = lisBMPRGB("../images/vide.bmp");
+				}
+				switch (plateau[y][x].number)
+				{
+				case 0:
+					plateau[y][x].image = lisBMPRGB("../images/0.bmp");
+					break;
+				case 1:
+					plateau[y][x].image = lisBMPRGB("../images/1.bmp");
+					break;
+				case 2:
+					plateau[y][x].image = lisBMPRGB("../images/2.bmp");
+					break;
+				case 3:
+					plateau[y][x].image = lisBMPRGB("../images/3.bmp");
+					break;
+				case 4:
+					plateau[y][x].image = lisBMPRGB("../images/4.bmp");
+					break;
+				case 5:
+					plateau[y][x].image = lisBMPRGB("../images/5.bmp");
+					break;
+				case 6:
+					plateau[y][x].image = lisBMPRGB("../images/6.bmp");
+					break;
+				case 7:
+					plateau[y][x].image = lisBMPRGB("../images/7.bmp");
+					break;
+				case 8:
+					plateau[y][x].image = lisBMPRGB("../images/8.bmp");
+					break;
+				default:
+					break;
+				}
+				if (plateau[y][x].bomb)
+				{
+					plateau[y][x].image = lisBMPRGB("../images/bomb.bmp");
+				}
+			}
+			else if (tailleImage == 16)
+			{
+				if (plateau[y][x].flag == 1)
+				{
+					plateau[y][x].imageDepart = lisBMPRGB("../images/flag-16.bmp");
+				}
+				else
+				{
+					plateau[y][x].imageDepart = lisBMPRGB("../images/vide-16.bmp");
+				}
 
-			switch (plateau[y][x].number)
-			{
-			case 0:
-				plateau[y][x].image = lisBMPRGB("../images/0.bmp");
-				break;
-			case 1:
-				plateau[y][x].image = lisBMPRGB("../images/1.bmp");
-				break;
-			case 2:
-				plateau[y][x].image = lisBMPRGB("../images/2.bmp");
-				break;
-			case 3:
-				plateau[y][x].image = lisBMPRGB("../images/3.bmp");
-				break;
-			case 4:
-				plateau[y][x].image = lisBMPRGB("../images/4.bmp");
-				break;
-			case 5:
-				plateau[y][x].image = lisBMPRGB("../images/5.bmp");
-				break;
-			case 6:
-				plateau[y][x].image = lisBMPRGB("../images/6.bmp");
-				break;
-			case 7:
-				plateau[y][x].image = lisBMPRGB("../images/7.bmp");
-				break;
-			case 8:
-				plateau[y][x].image = lisBMPRGB("../images/8.bmp");
-				break;
-			default:
-				break;
-			}
-			if (plateau[y][x].bomb)
-			{
-				plateau[y][x].image = lisBMPRGB("../images/bomb.bmp");
-			}
-
-			if (plateau[y][x].image == NULL)
-			{
-				printf("Erreur: échec du chargement de l'image pour plateau[%d][%d]\n", y, x);
-				continue;
-			}
-			if (plateau[y][x].imageDepart == NULL)
-			{
-				printf("Erreur: échec du chargement de l'imageDepart pour plateau[%d][%d]\n", y, x);
-				continue;
+				switch (plateau[y][x].number)
+				{
+				case 0:
+					plateau[y][x].image = lisBMPRGB("../images/0-16.bmp");
+					break;
+				case 1:
+					plateau[y][x].image = lisBMPRGB("../images/1-16.bmp");
+					break;
+				case 2:
+					plateau[y][x].image = lisBMPRGB("../images/2-16.bmp");
+					break;
+				case 3:
+					plateau[y][x].image = lisBMPRGB("../images/3-16.bmp");
+					break;
+				case 4:
+					plateau[y][x].image = lisBMPRGB("../images/4-16.bmp");
+					break;
+				case 5:
+					plateau[y][x].image = lisBMPRGB("../images/5-16.bmp");
+					break;
+				case 6:
+					plateau[y][x].image = lisBMPRGB("../images/6-16.bmp");
+					break;
+				case 7:
+					plateau[y][x].image = lisBMPRGB("../images/7-16.bmp");
+					break;
+				case 8:
+					plateau[y][x].image = lisBMPRGB("../images/8-16.bmp");
+					break;
+				default:
+					break;
+				}
+				if (plateau[y][x].bomb)
+				{
+					plateau[y][x].image = lisBMPRGB("../images/bomb-16.bmp");
+				}
 			}
 		}
 	}
 }
 
-void quadrillage(cell plateau[LONGUEUR][LARGEUR], int difficulty)
+void quadrillage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage)
 {
 	int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
 	for (int i = 1; i < nbLigne - 1; i++)
@@ -237,11 +292,11 @@ void quadrillage(cell plateau[LONGUEUR][LARGEUR], int difficulty)
 		{
 			if (plateau[i][j].revealed == 0)
 			{
-				ecrisImage(largeurFenetre() / 2 - (COTE_IMAGE * nbColonne) / 2 + COTE_IMAGE * j, hauteurFenetre() / 2 - (COTE_IMAGE * nbLigne) / 2 + COTE_IMAGE * i, COTE_IMAGE, COTE_IMAGE, plateau[i][j].imageDepart->donneesRGB);
+				ecrisImage(largeurFenetre() / 2 - (tailleImage * nbColonne) / 2 + tailleImage * j, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2 + tailleImage * i, tailleImage, tailleImage, plateau[i][j].imageDepart->donneesRGB);
 			}
 			else
 			{
-				ecrisImage(largeurFenetre() / 2 - (COTE_IMAGE * nbColonne) / 2 + COTE_IMAGE * j, hauteurFenetre() / 2 - (COTE_IMAGE * nbLigne) / 2 + COTE_IMAGE * i, COTE_IMAGE, COTE_IMAGE, plateau[i][j].image->donneesRGB);
+				ecrisImage(largeurFenetre() / 2 - (tailleImage * nbColonne) / 2 + tailleImage * j, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2 + tailleImage * i, tailleImage, tailleImage, plateau[i][j].image->donneesRGB);
 			}
 		}
 	}
