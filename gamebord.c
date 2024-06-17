@@ -21,6 +21,7 @@ void initTab(cell tab[LONGUEUR][LARGEUR], int difficulty)
             tab[i][j].flag = 0;
             tab[i][j].number = 0;
             tab[i][j].revealed = 0;
+            tab[i][j].imageDepart = lisBMPRGB("../images/vide.bmp");
         }
     }
 }
@@ -177,18 +178,17 @@ int aPerdu(cell tab[LONGUEUR][LARGEUR], int x, int y)
     return 0;
 }
 
-void flager(cell tab[LONGUEUR][LARGEUR], int x, int y, int *nbFlag)
+void flager(cell tab[LONGUEUR][LARGEUR], int x, int y, int *nbFlag, int tailleImage)
 {
+
     if (tab[x][y].flag == 0)
     {
         tab[x][y].flag = 1;
-        tab[x][y].imageDepart = lisBMPRGB("../images/flag.bmp");
         *nbFlag = *nbFlag - 1;
     }
     else
     {
         tab[x][y].flag = 0;
-        tab[x][y].imageDepart = lisBMPRGB("../images/vide.bmp");
         *nbFlag = *nbFlag + 1;
     }
 }
@@ -314,4 +314,13 @@ void explosion(cell tab[LONGUEUR][LARGEUR], int difficulty, int x, int y)
 {
     tab[x][y].image = lisBMPRGB("../images/boom.bmp");
     tab[x][y].revealed = 1;
+}
+void timer(int time0, int* seconde, int*minute)
+{
+    int temps = time(NULL);
+
+    printf("le gros caca a tony");
+
+    *minute = (temps-time0)/60;
+    *seconde = (temps-time0)-60*(*minute);
 }
