@@ -40,8 +40,8 @@ void copieList(coo tab1[LARGEUR * LONGUEUR], coo tab2[LARGEUR * LONGUEUR], int d
 void revealBomb(cell tab[LONGUEUR][LARGEUR], int difficulty);
 void explosion(cell tab[LONGUEUR][LARGEUR], int difficulty, int x, int y);
 void initBomb(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty, int nbBomb);
-void timer(int time0, int* seconde, int*minute);
-
+void timer(int time0, char *chaine, bool aPerdu);
+void actualiseChaineDrapeau(char chaineDrapeau[50], int nbDrapeau);
 
 bool targetMouse(coo *coord, int difficulty, int tailleImage);
 void gestionEvenement(EvenementGfx evenement);
