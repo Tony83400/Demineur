@@ -1,6 +1,6 @@
 #include <time.h>
 #include <unistd.h>
-
+#include <string.h>
 #include <stdlib.h>        // Pour pouvoir utiliser exit()
 #include <stdio.h>         // Pour pouvoir utiliser printf()
 #include <math.h>          // Pour pouvoir utiliser sin() et cos()
@@ -315,12 +315,37 @@ void explosion(cell tab[LONGUEUR][LARGEUR], int difficulty, int x, int y)
     tab[x][y].image = lisBMPRGB("../images/boom.bmp");
     tab[x][y].revealed = 1;
 }
-void timer(int time0, int* seconde, int*minute)
+void timer(int time0, char *chaine, bool aPerdu)
 {
-    int temps = time(NULL);
+    if (!aPerdu)
+    {
+        char chaineSec[50], chaineMin[50];
+        int temps = time(NULL);
 
-    printf("le gros caca a tony");
+        int minute = (temps - time0) / 60 + 1;
+        int seconde = (temps - time0) - 60 * (minute - 1);
+        sprintf(chaineSec, "%d", seconde);
+        strcat(chaineSec, " sec");
 
-    *minute = (temps-time0)/60;
-    *seconde = (temps-time0)-60*(*minute);
+        if (minute > 0)
+        {
+            sprintf(chaineMin, "%d", minute);
+            strcat(chaineMin, " min ");
+            strcat(chaineMin, chaineSec);
+            strcpy(chaine, chaineMin);
+        }
+        else
+        {
+            strcpy(chaine, chaineSec);
+        }
+    }
+}
+
+void actualiseChaineDrapeau(char chaineDrapeau[50], int nbDrapeau)
+{
+    char chaineTemp[50];
+    sprintf(chaineTemp, "%d", nbDrapeau);
+    strcat(chaineTemp," flag");
+    strcpy(chaineDrapeau,chaineTemp);
+    printf("%s \n",chaineDrapeau);
 }
