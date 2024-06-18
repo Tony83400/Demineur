@@ -5,6 +5,7 @@
 #include "GFXlib/BmpLib.h" // Cet include permet de manipuler des fichiers BMP
 #include "GFXlib/ESLib.h"  // Pour utiliser valeurAleatoire()
 #include "Fonction.h"
+#include <time.h>
 
 /* La fonction de gestion des evenements, appelee automatiquement par le systeme
 des qu'une evenement survient */
@@ -16,17 +17,21 @@ void gestionEvenement(EvenementGfx evenement)
 	static int tab_difficulty[3] = {18, 45, 100};
 	static int *ptFlag = &nbFlag;
 	static bool aPerdu = false, premierClique = false, initialisationFaite = false;
+	static int tempsInitial = 0;
+	static char chaineTemps[50],chaineDrapeau[50];
 
 	static cell plateau[LONGUEUR][LARGEUR];
 	if (!initialisationFaite)
 	{
+		tempsInitial=time(NULL);
 		nbFlag = tab_difficulty[difficulty];
 		initTab(plateau, difficulty);
 		initImage(plateau, difficulty, tailleImage);
 		// afficheTab(plateau, difficulty);
 		initialisationFaite = true;
+		actualiseChaineDrapeau(chaineDrapeau,nbFlag);
 	}
-
+	timer(tempsInitial,chaineTemps,aPerdu);
 	static bool pleinEcran = false; // Pour savoir si on est en mode plein ecran ou pas
 	switch (evenement)
 	{
@@ -58,7 +63,10 @@ void gestionEvenement(EvenementGfx evenement)
 		}
 		initImage(plateau, difficulty, tailleImage);
 		quadrillage(plateau, difficulty, tailleImage);
-
+		couleurCourante(0,0,0);
+		epaisseurDeTrait(1);
+		afficheChaine(chaineTemps,14,0,hauteurFenetre()-30);
+		afficheChaine(chaineDrapeau,14,largeurFenetre()-80,hauteurFenetre()-30);
 		break;
 
 	case Clavier:
@@ -138,7 +146,7 @@ void gestionEvenement(EvenementGfx evenement)
 			if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu)
 			{
 				flager(plateau, CordClick.x, CordClick.y, ptFlag, tailleImage);
-				printf(" nb drapeau : %d \n", nbFlag);
+				actualiseChaineDrapeau(chaineDrapeau,nbFlag);
 			}
 			break;
 		case DroiteRelache:
