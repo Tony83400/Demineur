@@ -57,13 +57,18 @@ void gestionEvenement(EvenementGfx evenement)
 		if (difficulteChoisis) // Affiche la grille
 		{
 			// printf("Début affichage %ld \n", time(NULL) - tempsInitial);
-			if (COTE_IMAGE * (15 + difficulty * 5) > hauteurFenetre()) // Calcul pour savoir si la grille rentre dans la fenetre
-			{
-				tailleImage = 16;
-			}
-			else
+			if (COTE_IMAGE * (15 + difficulty * 5) < hauteurFenetre() && COTE_IMAGE * (10 + difficulty * 5) < largeurFenetre()) // Calcul pour savoir si la grille rentre dans la fenetre
 			{
 				tailleImage = 32;
+			}
+			else if (COTE_IMAGE * 3 / 4 * (15 + difficulty * 5) < hauteurFenetre() && COTE_IMAGE * 3 / 4 * (10 + difficulty * 5) < largeurFenetre())
+			{
+				tailleImage = 24;
+			}
+
+			else
+			{
+				tailleImage = 16;
 			}
 			// Affichage de la grille
 			initImage(plateau, difficulty, tailleImage);
@@ -256,143 +261,5 @@ void gestionEvenement(EvenementGfx evenement)
 		printf("Largeur : %d\t", largeurFenetre());
 		printf("Hauteur : %d\n", hauteurFenetre());
 		break;
-	}
-}
-
-void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage)
-{
-	int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
-	for (int y = 1; y < nbLigne - 1; y++)
-	{
-		for (int x = 1; x < nbColonne - 1; x++)
-		{
-			libereDonneesImageRGB(&plateau[y][x].image);
-			libereDonneesImageRGB(&plateau[y][x].imageDepart);
-
-			if (tailleImage == 32)
-			{
-				if (plateau[y][x].flag == 1)
-				{
-					plateau[y][x].imageDepart = lisBMPRGB("../images/flag.bmp");
-				}
-				else
-				{
-					plateau[y][x].imageDepart = lisBMPRGB("../images/vide.bmp");
-				}
-				switch (plateau[y][x].number)
-				{
-				case 0:
-					plateau[y][x].image = lisBMPRGB("../images/0.bmp");
-					break;
-				case 1:
-					plateau[y][x].image = lisBMPRGB("../images/1.bmp");
-					break;
-				case 2:
-					plateau[y][x].image = lisBMPRGB("../images/2.bmp");
-					break;
-				case 3:
-					plateau[y][x].image = lisBMPRGB("../images/3.bmp");
-					break;
-				case 4:
-					plateau[y][x].image = lisBMPRGB("../images/4.bmp");
-					break;
-				case 5:
-					plateau[y][x].image = lisBMPRGB("../images/5.bmp");
-					break;
-				case 6:
-					plateau[y][x].image = lisBMPRGB("../images/6.bmp");
-					break;
-				case 7:
-					plateau[y][x].image = lisBMPRGB("../images/7.bmp");
-					break;
-				case 8:
-					plateau[y][x].image = lisBMPRGB("../images/8.bmp");
-					break;
-				default:
-					break;
-				}
-				if (plateau[y][x].bomb == 1)
-				{
-					plateau[y][x].image = lisBMPRGB("../images/bomb.bmp");
-				}
-				if (plateau[y][x].explosion)
-				{
-					plateau[y][x].image = lisBMPRGB("../images/boom.bmp");
-				}
-			}
-			else if (tailleImage == 16)
-			{
-				if (plateau[y][x].flag == 1)
-				{
-					plateau[y][x].imageDepart = lisBMPRGB("../images/flag-16.bmp");
-				}
-				else
-				{
-					plateau[y][x].imageDepart = lisBMPRGB("../images/vide-16.bmp");
-				}
-
-				switch (plateau[y][x].number)
-				{
-				case 0:
-					plateau[y][x].image = lisBMPRGB("../images/0-16.bmp");
-					break;
-				case 1:
-					plateau[y][x].image = lisBMPRGB("../images/1-16.bmp");
-					break;
-				case 2:
-					plateau[y][x].image = lisBMPRGB("../images/2-16.bmp");
-					break;
-				case 3:
-					plateau[y][x].image = lisBMPRGB("../images/3-16.bmp");
-					break;
-				case 4:
-					plateau[y][x].image = lisBMPRGB("../images/4-16.bmp");
-					break;
-				case 5:
-					plateau[y][x].image = lisBMPRGB("../images/5-16.bmp");
-					break;
-				case 6:
-					plateau[y][x].image = lisBMPRGB("../images/6-16.bmp");
-					break;
-				case 7:
-					plateau[y][x].image = lisBMPRGB("../images/7-16.bmp");
-					break;
-				case 8:
-					plateau[y][x].image = lisBMPRGB("../images/8-16.bmp");
-					break;
-				default:
-					break;
-				}
-				if (plateau[y][x].bomb == 1)
-				{
-					plateau[y][x].image = lisBMPRGB("../images/bomb-16.bmp");
-				}
-				if (plateau[y][x].explosion)
-				{
-					plateau[y][x].image = lisBMPRGB("../images/boom-16.bmp");
-				}
-			}
-		}
-	}
-}
-
-void quadrillage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage)
-{
-
-	int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
-	for (int i = 1; i < nbLigne - 1; i++)
-	{
-		for (int j = 1; j < nbColonne - 1; j++)
-		{
-			// infoCase(plateau, i, j);
-			if (plateau[i][j].revealed == 0)
-			{
-				ecrisImage(largeurFenetre() / 2 - (tailleImage * nbColonne) / 2 + tailleImage * j, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2 + tailleImage * i, tailleImage, tailleImage, plateau[i][j].imageDepart->donneesRGB);
-			}
-			else
-			{
-				ecrisImage(largeurFenetre() / 2 - (tailleImage * nbColonne) / 2 + tailleImage * j, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2 + tailleImage * i, tailleImage, tailleImage, plateau[i][j].image->donneesRGB);
-			}
-		}
 	}
 }
