@@ -22,6 +22,7 @@ void initTab(cell tab[LONGUEUR][LARGEUR], int difficulty)
             tab[i][j].number = 0;
             tab[i][j].revealed = 0;
             tab[i][j].imageDepart = lisBMPRGB("../images/vide.bmp");
+            tab[i][j].explosion = 0;
         }
     }
 }
@@ -153,20 +154,39 @@ int nbBombe(cell tab[LONGUEUR][LARGEUR], int difficulty)
     }
     return nbBombe;
 }
-
-int aGagne(cell tab[LONGUEUR][LARGEUR])
+void trouveFlag(cell tab[LONGUEUR][LARGEUR], int difficulty, int *ptFlag)
 {
-    for (int i = 1; i < LONGUEUR - 1; i++)
+    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+
+    for (int i = 1; i < nbLigne - 1; i++)
     {
-        for (int j = 1; j < LARGEUR - 1; j++)
+        for (int j = 1; j < nbColonne - 1; j++)
         {
-            if (tab[i][j].bomb != tab[i][j].flag)
+            if (tab[i][j].flag == 1)
             {
-                return 0;
+                *ptFlag = *ptFlag - 1;
             }
         }
     }
-    return 1;
+}
+
+bool verifAGagne(cell tab[LONGUEUR][LARGEUR], int difficulty)
+{
+    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
+
+    for (int i = 1; i < nbLigne - 1; i++)
+    {
+        for (int j = 1; j < nbColonne - 1; j++)
+        {
+            if (tab[i][j].bomb == tab[i][j].revealed)
+            {
+                printf("x %d , y %d \n", i, j);
+                return false;
+            }
+        }
+    }
+    printf("A perdu \n");
+    return true;
 }
 
 int aPerdu(cell tab[LONGUEUR][LARGEUR], int x, int y)
@@ -180,16 +200,18 @@ int aPerdu(cell tab[LONGUEUR][LARGEUR], int x, int y)
 
 void flager(cell tab[LONGUEUR][LARGEUR], int x, int y, int *nbFlag, int tailleImage)
 {
-
-    if (tab[x][y].flag == 0)
+    if (tab[x][y].revealed == 0)
     {
-        tab[x][y].flag = 1;
-        *nbFlag = *nbFlag - 1;
-    }
-    else
-    {
-        tab[x][y].flag = 0;
-        *nbFlag = *nbFlag + 1;
+        if (tab[x][y].flag == 0)
+        {
+            tab[x][y].flag = 1;
+            *nbFlag = *nbFlag - 1;
+        }
+        else
+        {
+            tab[x][y].flag = 0;
+            *nbFlag = *nbFlag + 1;
+        }
     }
 }
 
@@ -226,6 +248,8 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
                 if (cx - 1 > 0 && cy - 1 > 0 && tab[cx - 1][cy - 1].revealed == 0)
                 {
                     tab[cx - 1][cy - 1].revealed = 1;
+                    tab[cx - 1][cy - 1].flag = 0;
+
                     tab2[indice].x = cx - 1;
                     tab2[indice].y = cy - 1;
                     indice++;
@@ -233,6 +257,8 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
                 if (cy - 1 > 0 && tab[cx][cy - 1].revealed == 0)
                 {
                     tab[cx][cy - 1].revealed = 1;
+                    tab[cx][cy - 1].flag = 0;
+
                     tab2[indice].x = cx;
                     tab2[indice].y = cy - 1;
                     indice++;
@@ -240,6 +266,8 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
                 if (cx + 1 < nbLigne - 1 && cy - 1 > 0 && tab[cx + 1][cy - 1].revealed == 0)
                 {
                     tab[cx + 1][cy - 1].revealed = 1;
+                    tab[cx + 1][cy - 1].flag = 0;
+
                     tab2[indice].x = cx + 1;
                     tab2[indice].y = cy - 1;
                     indice++;
@@ -247,6 +275,8 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
                 if (cx - 1 > 0 && tab[cx - 1][cy].revealed == 0)
                 {
                     tab[cx - 1][cy].revealed = 1;
+                    tab[cx - 1][cy].flag = 0;
+
                     tab2[indice].x = cx - 1;
                     tab2[indice].y = cy;
                     indice++;
@@ -254,6 +284,8 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
                 if (cx + 1 < nbLigne - 1 && tab[cx + 1][cy].revealed == 0)
                 {
                     tab[cx + 1][cy].revealed = 1;
+                    tab[cx + 1][cy].flag = 0;
+
                     tab2[indice].x = cx + 1;
                     tab2[indice].y = cy;
                     indice++;
@@ -261,6 +293,8 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
                 if (cx - 1 > 0 && cy + 1 < nbColonne - 1 && tab[cx - 1][cy + 1].revealed == 0)
                 {
                     tab[cx - 1][cy + 1].revealed = 1;
+                    tab[cx - 1][cy + 1].flag = 0;
+
                     tab2[indice].x = cx - 1;
                     tab2[indice].y = cy + 1;
                     indice++;
@@ -268,6 +302,8 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
                 if (cy + 1 < nbColonne - 1 && tab[cx][cy + 1].revealed == 0)
                 {
                     tab[cx][cy + 1].revealed = 1;
+                    tab[cx][cy + 1].flag = 0;
+
                     tab2[indice].x = cx;
                     tab2[indice].y = cy + 1;
                     indice++;
@@ -275,6 +311,8 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
                 if (cx + 1 < nbLigne - 1 && cy + 1 < nbColonne - 1 && tab[cx + 1][cy + 1].revealed == 0)
                 {
                     tab[cx + 1][cy + 1].revealed = 1;
+                    tab[cx + 1][cy + 1].flag = 0;
+
                     tab2[indice].x = cx + 1;
                     tab2[indice].y = cy + 1;
                     indice++;
@@ -312,7 +350,7 @@ void revealBomb(cell tab[LONGUEUR][LARGEUR], int difficulty)
 }
 void explosion(cell tab[LONGUEUR][LARGEUR], int difficulty, int x, int y)
 {
-    tab[x][y].image = lisBMPRGB("../images/boom.bmp");
+    tab[x][y].explosion = true;
     tab[x][y].revealed = 1;
 }
 void timer(int time0, char *chaine, bool aPerdu)
@@ -322,8 +360,8 @@ void timer(int time0, char *chaine, bool aPerdu)
         char chaineSec[50], chaineMin[50];
         int temps = time(NULL);
 
-        int minute = (temps - time0) / 60 + 1;
-        int seconde = (temps - time0) - 60 * (minute - 1);
+        int minute = (temps - time0) / 60;
+        int seconde = (temps - time0) - 60 * (minute);
         sprintf(chaineSec, "%d", seconde);
         strcat(chaineSec, " sec");
 
@@ -345,7 +383,6 @@ void actualiseChaineDrapeau(char chaineDrapeau[50], int nbDrapeau)
 {
     char chaineTemp[50];
     sprintf(chaineTemp, "%d", nbDrapeau);
-    strcat(chaineTemp," flag");
-    strcpy(chaineDrapeau,chaineTemp);
-    printf("%s \n",chaineDrapeau);
+    strcat(chaineTemp, " flag");
+    strcpy(chaineDrapeau, chaineTemp);
 }
