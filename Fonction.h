@@ -19,6 +19,7 @@ typedef struct cell
     int bomb;
     DonneesImageRGB *image;
     DonneesImageRGB *imageDepart;
+    bool explosion;
 } cell;
 
 typedef struct coo
@@ -32,7 +33,7 @@ void initTab(cell tab[LONGUEUR][LARGEUR], int difficulty);
 void afficheTab(cell tab[LONGUEUR][LARGEUR], int difficulty);
 void initNumber(cell tab[LONGUEUR][LARGEUR], int difficulty);
 int nbBombe(cell tab[LONGUEUR][LARGEUR], int difficulty);
-int aGagne(cell tab[LONGUEUR][LARGEUR]);
+bool verifAGagne(cell tab[LONGUEUR][LARGEUR], int difficulty);
 int aPerdu(cell tab[LONGUEUR][LARGEUR], int x, int y);
 void flager(cell tab[LONGUEUR][LARGEUR], int x, int y, int *nbFlag, int tailleImage);
 void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty);
@@ -42,8 +43,12 @@ void explosion(cell tab[LONGUEUR][LARGEUR], int difficulty, int x, int y);
 void initBomb(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty, int nbBomb);
 void timer(int time0, char *chaine, bool aPerdu);
 void actualiseChaineDrapeau(char chaineDrapeau[50], int nbDrapeau);
+void trouveFlag(cell tab[LONGUEUR][LARGEUR], int difficulty, int *ptFlag);
+
 
 bool targetMouse(coo *coord, int difficulty, int tailleImage);
+bool cliqueButton(int x1Button, int y1Button, int x2Button, int y2Button);
+
 void gestionEvenement(EvenementGfx evenement);
 void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage);
 void quadrillage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage);
