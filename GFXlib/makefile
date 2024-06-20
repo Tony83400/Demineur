@@ -1,5 +1,5 @@
-main: main.o display.o interactivity.o gamebord.o libisentlib.a
-	gcc -Wall main.o display.o interactivity.o gamebord.o -o main libisentlib.a -lm -lglut -lGL -lX11
+main: main.o display.o interactivity.o gameboard.o initGameboard.o displayImages.o libisentlib.a
+	gcc -Wall main.o display.o interactivity.o gameboard.o displayImages.o initGameboard.o -o main libisentlib.a -lm -lglut -lGL -lX11
 # Sous macOS, commenter la ligne de commande ci-dessus (en mettant un # au debut)
 # et de-commenter la ligne de commande ci-apres :
 #	gcc -Wall main.o -o main libisentlib.a -lm -framework OpenGL -framework GLUT
@@ -15,8 +15,14 @@ display.o: ../display.c GfxLib.h BmpLib.h ESLib.h
 interactivity.o: ../interactivity.c GfxLib.h BmpLib.h ESLib.h 
 	gcc -Wall -c ../interactivity.c
 
-gamebord.o: ../gamebord.c GfxLib.h BmpLib.h ESLib.h 
-	gcc -Wall -c ../gamebord.c
+gameboard.o: ../gameboard.c GfxLib.h BmpLib.h ESLib.h 
+	gcc -Wall -c ../gameboard.c -lm
+
+displayImages.o: ../displayImages.c GfxLib.h BmpLib.h ESLib.h
+	gcc -Wall -c ../displayImages.c
+
+initGameboard.o: ../initGameboard.c GfxLib.h BmpLib.h ESLib.h
+	gcc -Wall -c ../initGameboard.c
 
 libisentlib.a: BmpLib.o ErreurLib.o ESLib.o GfxLib.o OutilsLib.o SocketLib.o ThreadLib.o VectorLib.o WavLib.o
 	ar r libisentlib.a BmpLib.o ErreurLib.o ESLib.o GfxLib.o OutilsLib.o SocketLib.o ThreadLib.o VectorLib.o WavLib.o
