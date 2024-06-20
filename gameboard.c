@@ -9,54 +9,7 @@
 #include "GFXlib/ESLib.h"  // Pour utiliser valeurAleatoire()
 #include "Fonction.h"
 
-void initTab(cell tab[LONGUEUR][LARGEUR], int difficulty)
-{
-    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
 
-    for (int i = 1; i < nbLigne - 1; i++)
-    {
-        for (int j = 1; j < nbColonne - 1; j++)
-        {
-            tab[i][j].bomb = 0;
-            tab[i][j].flag = 0;
-            tab[i][j].number = 0;
-            tab[i][j].revealed = 0;
-            tab[i][j].imageDepart = lisBMPRGB("../images/vide.bmp");
-            tab[i][j].explosion = 0;
-        }
-    }
-}
-
-void initBomb(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty, int nbBomb)
-{
-    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
-    int xr;
-    int yr;
-
-    for (int k = 1; k <= nbBomb; k++)
-    {
-        xr = rand() % (nbLigne - 2) + 1;
-        yr = rand() % (nbColonne - 2) + 1;
-        if ((xr >= x - 1 && xr <= x + 1 && yr >= y - 1 && yr <= y + 1) || tab[xr][yr].bomb == 1)
-        {
-            k = k - 1;
-        }
-        else
-        {
-            tab[xr][yr].bomb = 1;
-        }
-    }
-
-    tab[x - 1][y - 1].bomb = 0;
-    tab[x - 1][y].bomb = 0;
-    tab[x - 1][y + 1].bomb = 0;
-    tab[x][y - 1].bomb = 0;
-    tab[x][y].bomb = 0;
-    tab[x][y + 1].bomb = 0;
-    tab[x + 1][y - 1].bomb = 0;
-    tab[x + 1][y].bomb = 0;
-    tab[x + 1][y + 1].bomb = 0;
-}
 
 void afficheTab(cell tab[LONGUEUR][LARGEUR], int difficulty)
 {
@@ -80,80 +33,7 @@ void afficheTab(cell tab[LONGUEUR][LARGEUR], int difficulty)
     printf("\n");
 }
 
-int verifVoisin(cell tab[LONGUEUR][LARGEUR], int x, int y)
-{
-    int voisin = 0;
-    if (tab[x - 1][y - 1].bomb == 1)
-    {
-        voisin = voisin + 1;
-    }
-    if (tab[x][y - 1].bomb == 1)
-    {
-        voisin = voisin + 1;
-    }
-    if (tab[x + 1][y - 1].bomb == 1)
-    {
-        voisin = voisin + 1;
-    }
-    if (tab[x - 1][y].bomb == 1)
-    {
-        voisin = voisin + 1;
-    }
-    if (tab[x + 1][y].bomb == 1)
-    {
-        voisin = voisin + 1;
-    }
-    if (tab[x - 1][y + 1].bomb == 1)
-    {
-        voisin = voisin + 1;
-    }
-    if (tab[x][y + 1].bomb == 1)
-    {
-        voisin = voisin + 1;
-    }
-    if (tab[x + 1][y + 1].bomb == 1)
-    {
-        voisin = voisin + 1;
-    }
-    return voisin;
-}
 
-void initNumber(cell tab[LONGUEUR][LARGEUR], int difficulty)
-{
-    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
-    for (int i = 1; i < nbLigne - 1; i++)
-    {
-        for (int j = 1; j < nbColonne - 1; j++)
-        {
-            if (tab[i][j].bomb == 0)
-            {
-                tab[i][j].number = verifVoisin(tab, i, j);
-            }
-            else
-            {
-                tab[i][j].number = -1;
-            }
-        }
-    }
-}
-
-int nbBombe(cell tab[LONGUEUR][LARGEUR], int difficulty)
-{
-    int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
-
-    int nbBombe = 0;
-    for (int i = 1; i < nbLigne - 1; i++)
-    {
-        for (int j = 1; j < nbColonne - 1; j++)
-        {
-            if (tab[i][j].bomb == 1)
-            {
-                nbBombe = nbBombe + 1;
-            }
-        }
-    }
-    return nbBombe;
-}
 void trouveFlag(cell tab[LONGUEUR][LARGEUR], int difficulty, int *ptFlag)
 {
     int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
@@ -180,7 +60,6 @@ bool verifAGagne(cell tab[LONGUEUR][LARGEUR], int difficulty)
         {
             if (tab[i][j].bomb == tab[i][j].revealed)
             {
-                printf("x %d , y %d \n", i, j);
                 return false;
             }
         }
@@ -189,14 +68,6 @@ bool verifAGagne(cell tab[LONGUEUR][LARGEUR], int difficulty)
     return true;
 }
 
-int aPerdu(cell tab[LONGUEUR][LARGEUR], int x, int y)
-{
-    if (tab[x][y].bomb == 1)
-    {
-        return 1;
-    }
-    return 0;
-}
 
 void flager(cell tab[LONGUEUR][LARGEUR], int x, int y, int *nbFlag, int tailleImage)
 {
@@ -326,10 +197,10 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
 }
 void infoCase(cell tab[LONGUEUR][LARGEUR], int x, int y)
 {
-    printf("x : %d , y : %d \n", x, y);
-    printf("Nombre : %d \n", tab[x][y].number);
-    printf("Bombe : %d \n", tab[x][y].bomb);
-    printf("Drapeau : %d \n", tab[x][y].flag);
+    printf("x : %d , y : %d ", x, y);
+    printf("Nombre : %d ", tab[x][y].number);
+    printf("Bombe : %d ", tab[x][y].bomb);
+    printf("Drapeau : %d ", tab[x][y].flag);
     printf("Reveal : %d \n", tab[x][y].revealed);
 }
 
@@ -353,6 +224,7 @@ void explosion(cell tab[LONGUEUR][LARGEUR], int difficulty, int x, int y)
     tab[x][y].explosion = true;
     tab[x][y].revealed = 1;
 }
+
 void timer(int time0, char *chaine, bool aPerdu)
 {
     if (!aPerdu)
