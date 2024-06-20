@@ -6,6 +6,7 @@
 #include "GFXlib/ESLib.h"  // Pour utiliser valeurAleatoire()
 #include "Fonction.h"
 #include <time.h>
+#include <unistd.h>
 
 /* La fonction de gestion des evenements, appelee automatiquement par le systeme
 des qu'une evenement survient */
@@ -16,22 +17,23 @@ void gestionEvenement(EvenementGfx evenement)
 	static int difficulty = 0, nbFlag = 0, tailleImage = 32;
 	static int tab_difficulty[3] = {18, 45, 100};
 	static int *ptFlag = &nbFlag;
-	static bool aPerdu = false, premierClique = false, initialisationFaite = false;
+	static bool aPerdu = false, premierClique = false, initialisationFaite = false, difficulteChoisis = false, aGagne = false;
 	static int tempsInitial = 0;
-	static char chaineTemps[50],chaineDrapeau[50];
+	static char chaineTemps[50], chaineDrapeau[50];
 
 	static cell plateau[LONGUEUR][LARGEUR];
-	if (!initialisationFaite)
+	if (!initialisationFaite && difficulteChoisis)
 	{
-		tempsInitial=time(NULL);
+		tempsInitial = time(NULL);
 		nbFlag = tab_difficulty[difficulty];
 		initTab(plateau, difficulty);
 		initImage(plateau, difficulty, tailleImage);
-		// afficheTab(plateau, difficulty);
+		afficheTab(plateau, difficulty);
 		initialisationFaite = true;
-		actualiseChaineDrapeau(chaineDrapeau,nbFlag);
+		actualiseChaineDrapeau(chaineDrapeau, nbFlag);
 	}
-	timer(tempsInitial,chaineTemps,aPerdu);
+	
+
 	static bool pleinEcran = false; // Pour savoir si on est en mode plein ecran ou pas
 	switch (evenement)
 	{
@@ -53,20 +55,59 @@ void gestionEvenement(EvenementGfx evenement)
 
 		// On part d'un fond d'ecran blanc
 		effaceFenetre(255, 255, 255);
-		if (COTE_IMAGE * (15 + difficulty * 5) > hauteurFenetre())
+		if (difficulteChoisis)
 		{
-			tailleImage = 16;
+			if (COTE_IMAGE * (15 + difficulty * 5) > hauteurFenetre())
+			{
+				tailleImage = 16;
+			}
+			else
+			{
+				tailleImage = 32;
+			}
+			initImage(plateau, difficulty, tailleImage);
+			quadrillage(plateau, difficulty, tailleImage);
+			couleurCourante(0, 0, 0);
+			epaisseurDeTrait(1);
+			afficheChaine(chaineTemps, 14, 0, hauteurFenetre() - 30);
+			afficheChaine(chaineDrapeau, 14, largeurFenetre() - 80, hauteurFenetre() - 30);
+		}
+
+		else
+		{
+			couleurCourante(0, 255, 0);
+			rectangle(largeurFenetre() / 5, hauteurFenetre() / 3, largeurFenetre() * 2 / 5, hauteurFenetre() * 2 / 3);
+			couleurCourante(0, 0, 255);
+			rectangle(largeurFenetre() * 2 / 5, hauteurFenetre() / 3, largeurFenetre() * 3 / 5, hauteurFenetre() * 2 / 3);
+			couleurCourante(255, 0, 0);
+			rectangle(largeurFenetre() * 3 / 5, hauteurFenetre() / 3, largeurFenetre() * 4 / 5, hauteurFenetre() * 2 / 3);
+
+			afficheChaine("Selectionnez la difficulte ", 27, largeurFenetre() / 2 - 150, hauteurFenetre() * 2 / 3 + 30);
+			afficheChaine("Facile", 20, largeurFenetre() / 5 + 50, hauteurFenetre() / 3 + 50);
+		}
+		if (aPerdu)
+		{
+
+			couleurCourante(230, 230, 230);
+			rectangle(5, 5, 130, 30);
+			couleurCourante(0, 0, 0);
+			afficheChaine("Recommencer", 15, 15, 10);
+		}
+		else if(aGagne)
+		{
+			couleurCourante(230, 230, 230);
+			rectangle(5, 5, 130, 30);
+			couleurCourante(0, 0, 0);
+			afficheChaine("Recommencer", 15, 15, 10);
+			afficheChaine("Victoire",12,10,100);
 		}
 		else
 		{
-			tailleImage = 32;
+			timer(tempsInitial, chaineTemps, aPerdu);
 		}
-		initImage(plateau, difficulty, tailleImage);
-		quadrillage(plateau, difficulty, tailleImage);
-		couleurCourante(0,0,0);
-		epaisseurDeTrait(1);
-		afficheChaine(chaineTemps,14,0,hauteurFenetre()-30);
-		afficheChaine(chaineDrapeau,14,largeurFenetre()-80,hauteurFenetre()-30);
+		
+		
+
 		break;
 
 	case Clavier:
@@ -100,9 +141,26 @@ void gestionEvenement(EvenementGfx evenement)
 		{
 		case GaucheAppuye:
 			// printf("Bouton gauche appuye en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
-			couleurCourante(0, 255, 0);
+			if (!difficulteChoisis)
+			{
+				if (cliqueButton(largeurFenetre() / 5, hauteurFenetre() / 3, largeurFenetre() * 2 / 5, hauteurFenetre() * 2 / 3))
+				{
+					difficulty = 0;
+					difficulteChoisis = true;
+				}
+				else if (cliqueButton(largeurFenetre() * 2 / 5, hauteurFenetre() / 3, largeurFenetre() * 3 / 5, hauteurFenetre() * 2 / 3))
+				{
+					difficulty = 1;
+					difficulteChoisis = true;
+				}
+				else if (cliqueButton(largeurFenetre() * 3 / 5, hauteurFenetre() / 3, largeurFenetre() * 4 / 5, hauteurFenetre() * 2 / 3))
+				{
+					difficulty = 2;
+					difficulteChoisis = true;
+				}
+			}
 
-			if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu)
+			else if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu && difficulteChoisis)
 			{
 				if (!premierClique)
 				{
@@ -110,7 +168,6 @@ void gestionEvenement(EvenementGfx evenement)
 					initNumber(plateau, difficulty);
 					initImage(plateau, difficulty, tailleImage);
 					afficheTab(plateau, difficulty);
-					printf("nombre de bombe : %d\n", nbBombe(plateau, difficulty));
 					premierClique = true;
 				}
 
@@ -120,6 +177,10 @@ void gestionEvenement(EvenementGfx evenement)
 					if (plateau[CordClick.x][CordClick.y].bomb == 0)
 					{
 						revealer(plateau, CordClick.x, CordClick.y, difficulty);
+						nbFlag = tab_difficulty[difficulty];
+						trouveFlag(plateau, difficulty, ptFlag);
+						actualiseChaineDrapeau(chaineDrapeau, *ptFlag);
+						aGagne = verifAGagne(plateau,difficulty);
 					}
 					else
 					{
@@ -137,16 +198,21 @@ void gestionEvenement(EvenementGfx evenement)
 			{
 				printf("pas dedans \n");
 			}
+			if ((aPerdu || aGagne )&& cliqueButton(5, 5, 130, 30))
+			{
+				aPerdu = false, premierClique = false, initialisationFaite = false, difficulteChoisis = false,aGagne=false;
+			}
+
 			break;
 		case GaucheRelache:
 			// printf("Bouton gauche relache en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
 			break;
 		case DroiteAppuye:
 			couleurCourante(0, 0, 255);
-			if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu)
+			if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu && difficulteChoisis)
 			{
 				flager(plateau, CordClick.x, CordClick.y, ptFlag, tailleImage);
-				actualiseChaineDrapeau(chaineDrapeau,nbFlag);
+				actualiseChaineDrapeau(chaineDrapeau, nbFlag);
 			}
 			break;
 		case DroiteRelache:
@@ -158,6 +224,7 @@ void gestionEvenement(EvenementGfx evenement)
 			break;
 		case ScrollDown:
 			puts("Scroll down");
+			aGagne=true;
 			break;
 		case ScrollUp:
 			puts("Scroll up");
@@ -238,6 +305,10 @@ void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage)
 				{
 					plateau[y][x].image = lisBMPRGB("../images/bomb.bmp");
 				}
+				if (plateau[y][x].explosion)
+				{
+					plateau[y][x].image = lisBMPRGB("../images/boom.bmp");
+				}
 			}
 			else if (tailleImage == 16)
 			{
@@ -285,6 +356,10 @@ void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage)
 				if (plateau[y][x].bomb)
 				{
 					plateau[y][x].image = lisBMPRGB("../images/bomb-16.bmp");
+				}
+				if (plateau[y][x].explosion)
+				{
+					plateau[y][x].image = lisBMPRGB("../images/boom-16.bmp");
 				}
 			}
 		}
