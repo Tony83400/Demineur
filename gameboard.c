@@ -8,9 +8,6 @@
 #include "GFXlib/BmpLib.h" // Cet include permet de manipuler des fichiers BMP
 #include "GFXlib/ESLib.h"  // Pour utiliser valeurAleatoire()
 #include "Fonction.h"
-
-
-
 void afficheTab(cell tab[LONGUEUR][LARGEUR], int difficulty)
 {
     int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
@@ -32,7 +29,6 @@ void afficheTab(cell tab[LONGUEUR][LARGEUR], int difficulty)
     }
     printf("\n");
 }
-
 
 void trouveFlag(cell tab[LONGUEUR][LARGEUR], int difficulty, int *ptFlag)
 {
@@ -64,7 +60,6 @@ bool verifAGagne(cell tab[LONGUEUR][LARGEUR], int difficulty)
             }
         }
     }
-    printf("A perdu \n");
     return true;
 }
 
@@ -195,14 +190,7 @@ void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty)
         copieList(tab1, tab2, difficulty);
     }
 }
-void infoCase(cell tab[LONGUEUR][LARGEUR], int x, int y)
-{
-    printf("x : %d , y : %d ", x, y);
-    printf("Nombre : %d ", tab[x][y].number);
-    printf("Bombe : %d ", tab[x][y].bomb);
-    printf("Drapeau : %d ", tab[x][y].flag);
-    printf("Reveal : %d \n", tab[x][y].revealed);
-}
+
 
 void revealBomb(cell tab[LONGUEUR][LARGEUR], int difficulty)
 {
