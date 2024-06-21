@@ -5,7 +5,6 @@
 // Largeur et hauteur par defaut d'une image correspondant a nos criteres
 #define LargeurFenetre 800
 #define HauteurFenetre 600
-#define GAP_FACILE 300
 #define COTE_IMAGE 32
 
 #define LONGUEUR 27
@@ -28,13 +27,12 @@ typedef struct coo
     int y;
 } coo;
 
+void afficheTab(cell tab[LONGUEUR][LARGEUR], int difficulty);
+
 int verifVoisin(cell tab[LONGUEUR][LARGEUR], int x, int y);
 void initTab(cell tab[LONGUEUR][LARGEUR], int difficulty);
-void afficheTab(cell tab[LONGUEUR][LARGEUR], int difficulty);
 void initNumber(cell tab[LONGUEUR][LARGEUR], int difficulty);
-int nbBombe(cell tab[LONGUEUR][LARGEUR], int difficulty);
 bool verifAGagne(cell tab[LONGUEUR][LARGEUR], int difficulty);
-int aPerdu(cell tab[LONGUEUR][LARGEUR], int x, int y);
 void flager(cell tab[LONGUEUR][LARGEUR], int x, int y, int *nbFlag, int tailleImage);
 void revealer(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty);
 void copieList(coo tab1[LARGEUR * LONGUEUR], coo tab2[LARGEUR * LONGUEUR], int difficulty);
@@ -52,6 +50,5 @@ bool cliqueButton(int x1Button, int y1Button, int x2Button, int y2Button);
 void gestionEvenement(EvenementGfx evenement);
 void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage);
 void quadrillage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage);
-void infoCase(cell tab[LONGUEUR][LARGEUR], int x, int y);
 
 #endif
