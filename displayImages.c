@@ -17,7 +17,6 @@ void initImage(cell plateau[LONGUEUR][LARGEUR], int difficulty, int tailleImage)
 		{
 			libereDonneesImageRGB(&plateau[y][x].image);
 			libereDonneesImageRGB(&plateau[y][x].imageDepart);
-			// infoCase(plateau,y,x);
 			if (tailleImage == 32)
 			{
 				if (plateau[y][x].flag == 1)
