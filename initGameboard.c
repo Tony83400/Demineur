@@ -28,6 +28,7 @@ void initTab(cell tab[LONGUEUR][LARGEUR], int difficulty)
 
 void initBomb(cell tab[LONGUEUR][LARGEUR], int x, int y, int difficulty, int nbBomb)
 {
+   
     int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
     int xr;
     int yr;
