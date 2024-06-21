@@ -14,7 +14,6 @@ bool targetMouse(coo *coord, int difficulty, int tailleImage)
     {
         coord->y = ((abscisseSouris() - (largeurFenetre() / 2 - (tailleImage * nbColonne) / 2)) / tailleImage) + 1;
         coord->x = ((ordonneeSouris() - (hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2)) / tailleImage) + 1;
-        // printf("target : x : %d y : %d \n", coord->x, coord->y);
         return true;
     }
     return false;
