@@ -20,6 +20,10 @@ void gestionEvenement(EvenementGfx evenement)
 	static bool aPerdu = false, premierClique = false, initialisationFaite = false, difficulteChoisis = false, aGagne = false;
 	static int tempsInitial = 0;
 	static char chaineTemps[50], chaineDrapeau[50];
+	static DonneesImageRGB *imageVictoire;
+	static DonneesImageRGB *imageDefaite;
+	static DonneesImageRGB *imageFacile, *imageNormal, *imageHard;
+	int nbColonne = 10 + difficulty * 5 + 2, nbLigne = 15 + difficulty * 5 + 2;
 
 	static cell plateau[LONGUEUR][LARGEUR];
 	if (!initialisationFaite && difficulteChoisis)
@@ -28,7 +32,6 @@ void gestionEvenement(EvenementGfx evenement)
 		nbFlag = tab_difficulty[difficulty];
 		initTab(plateau, difficulty);
 		initImage(plateau, difficulty, tailleImage);
-		// afficheTab(plateau, difficulty);
 		initialisationFaite = true;
 		actualiseChaineDrapeau(chaineDrapeau, nbFlag);
 	}
@@ -56,12 +59,11 @@ void gestionEvenement(EvenementGfx evenement)
 		effaceFenetre(255, 255, 255);
 		if (difficulteChoisis) // Affiche la grille
 		{
-			// printf("Début affichage %ld \n", time(NULL) - tempsInitial);
-			if (COTE_IMAGE * (15 + difficulty * 5) < hauteurFenetre() && COTE_IMAGE * (10 + difficulty * 5) < largeurFenetre()) // Calcul pour savoir si la grille rentre dans la fenetre
+			if (COTE_IMAGE * (nbLigne) + 140 < hauteurFenetre() && COTE_IMAGE * (nbColonne) < largeurFenetre()) // Calcul pour savoir si la grille rentre dans la fenetre
 			{
 				tailleImage = 32;
 			}
-			else if (COTE_IMAGE * 3 / 4 * (15 + difficulty * 5) < hauteurFenetre() && COTE_IMAGE * 3 / 4 * (10 + difficulty * 5) < largeurFenetre())
+			else if (COTE_IMAGE * 3 / 4 * (nbLigne) + 140 < hauteurFenetre() && COTE_IMAGE * 3 / 4 * (nbColonne) < largeurFenetre())
 			{
 				tailleImage = 24;
 			}
@@ -72,43 +74,53 @@ void gestionEvenement(EvenementGfx evenement)
 			}
 			// Affichage de la grille
 			initImage(plateau, difficulty, tailleImage);
-			// printf("Début quadrillage\n");
 			quadrillage(plateau, difficulty, tailleImage);
-			// printf("Fin quadrillage\n");
 			couleurCourante(0, 0, 0);
 			epaisseurDeTrait(1);
 			afficheChaine(chaineTemps, 14, 0, hauteurFenetre() - 30);
 			afficheChaine(chaineDrapeau, 14, largeurFenetre() - 80, hauteurFenetre() - 30);
-			// printf("Fin affichage %ld\n \n", time(NULL) - tempsInitial);
 		}
 
 		else // Affiche le menu de selection de difficultée
 		{
-			couleurCourante(0, 255, 0);
-			rectangle(largeurFenetre() / 5, hauteurFenetre() / 3, largeurFenetre() * 2 / 5, hauteurFenetre() * 2 / 3);
-			couleurCourante(0, 0, 255);
-			rectangle(largeurFenetre() * 2 / 5, hauteurFenetre() / 3, largeurFenetre() * 3 / 5, hauteurFenetre() * 2 / 3);
-			couleurCourante(255, 0, 0);
-			rectangle(largeurFenetre() * 3 / 5, hauteurFenetre() / 3, largeurFenetre() * 4 / 5, hauteurFenetre() * 2 / 3);
+			
+			imageFacile = lisBMPRGB("../images/easy.bmp");
+			imageNormal = lisBMPRGB("../images/normal.bmp");
+			imageHard = lisBMPRGB("../images/hard.bmp");
 
+			ecrisImage(largeurFenetre() / 2 - 288, hauteurFenetre() / 2 - 96, imageFacile->largeurImage, imageFacile->hauteurImage, imageFacile->donneesRGB);
+			afficheChaine("Facile", 24, largeurFenetre() / 2 - 230, hauteurFenetre() / 2 - 144);
+
+			ecrisImage(largeurFenetre() / 2 - 96, hauteurFenetre() / 2 - 96, imageNormal->largeurImage, imageNormal->hauteurImage, imageNormal->donneesRGB);
+			afficheChaine("Moyen", 24, largeurFenetre() / 2 - 36, hauteurFenetre() / 2 - 144);
+
+			ecrisImage(largeurFenetre() / 2 + 96, hauteurFenetre() / 2 - 96, imageHard->largeurImage, imageHard->hauteurImage, imageHard->donneesRGB);
+			afficheChaine("Difficile", 24, largeurFenetre() / 2 + 144, hauteurFenetre() / 2 - 144);
+
+			couleurCourante(0, 0, 0);
 			afficheChaine("Selectionnez la difficulte ", 27, largeurFenetre() / 2 - 150, hauteurFenetre() * 2 / 3 + 30);
-			afficheChaine("Facile", 20, largeurFenetre() / 5 + 50, hauteurFenetre() / 3 + 50);
 		}
 		if (aPerdu) // Affiche les elements relative à lorsqu'on perd
 		{
 
 			couleurCourante(230, 230, 230);
-			rectangle(5, 5, 130, 30);
+			rectangle(largeurFenetre() / 2 - 96, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2, largeurFenetre() / 2 + 96, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2 - 40);
 			couleurCourante(0, 0, 0);
-			afficheChaine("Recommencer", 15, 15, 10);
+			afficheChaine("Recommencer", 24, largeurFenetre() / 2 - 86, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2 - 30);
+
+			imageDefaite = lisBMPRGB("../images/failure.bmp");
+			ecrisImage(largeurFenetre() / 2 - 88, hauteurFenetre() - (hauteurFenetre() / 2 - nbLigne * tailleImage / 2) - 14, imageDefaite->largeurImage, imageDefaite->hauteurImage, imageDefaite->donneesRGB);
 		}
 		else if (aGagne) // Affiche les elements relative à lorsqu'on gagne
 		{
 			couleurCourante(230, 230, 230);
-			rectangle(5, 5, 130, 30);
+			rectangle(largeurFenetre() / 2 - 96, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2, largeurFenetre() / 2 + 96, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2 - 40);
 			couleurCourante(0, 0, 0);
-			afficheChaine("Recommencer", 15, 15, 10);
-			afficheChaine("Victoire", 12, 10, 100);
+			afficheChaine("Recommencer", 24, largeurFenetre() / 2 - 86, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2 - 30);
+
+			imageVictoire = lisBMPRGB("../images/success.bmp");
+			ecrisImage(largeurFenetre() / 2 - 88, hauteurFenetre() - (hauteurFenetre() / 2 - nbLigne * tailleImage / 2) - 14, imageVictoire->largeurImage, imageVictoire->hauteurImage, imageVictoire->donneesRGB);
+			couleurCourante(255, 0, 0);
 		}
 		else // Actualise le timer si l'on est toujours en partit
 		{
@@ -118,7 +130,6 @@ void gestionEvenement(EvenementGfx evenement)
 		break;
 
 	case Clavier:
-		// printf("%c : ASCII %d\n", caractereClavier(), caractereClavier());
 
 		switch (caractereClavier())
 		{
@@ -133,13 +144,14 @@ void gestionEvenement(EvenementGfx evenement)
 			if (pleinEcran)
 				modePleinEcran();
 			else
+			{
 				redimensionneFenetre(LargeurFenetre, HauteurFenetre);
+			}
 			break;
 		}
 		break;
 
 	case ClavierSpecial:
-		// printf("ASCII %d\n", toucheClavier());
 
 		break;
 
@@ -147,52 +159,47 @@ void gestionEvenement(EvenementGfx evenement)
 		switch (etatBoutonSouris())
 		{
 		case GaucheAppuye:
-			// printf("Bouton gauche appuye en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
+
 			if (!difficulteChoisis) // Selection de la difficulté
 			{
-				if (cliqueButton(largeurFenetre() / 5, hauteurFenetre() / 3, largeurFenetre() * 2 / 5, hauteurFenetre() * 2 / 3))
+				if (cliqueButton(largeurFenetre() / 2 - 288, hauteurFenetre() / 2 - 144, largeurFenetre() / 2 - 96, hauteurFenetre() / 2 + 96))
 				{
 					difficulty = 0;
 					difficulteChoisis = true;
 				}
-				else if (cliqueButton(largeurFenetre() * 2 / 5, hauteurFenetre() / 3, largeurFenetre() * 3 / 5, hauteurFenetre() * 2 / 3))
+				else if (cliqueButton(largeurFenetre() / 2 - 96, hauteurFenetre() / 2 - 144, largeurFenetre() / 2 + 96, hauteurFenetre() / 2 + 96))
 				{
 					difficulty = 1;
 					difficulteChoisis = true;
 				}
-				else if (cliqueButton(largeurFenetre() * 3 / 5, hauteurFenetre() / 3, largeurFenetre() * 4 / 5, hauteurFenetre() * 2 / 3))
+				else if (cliqueButton(largeurFenetre() / 2 + 96, hauteurFenetre() / 2 - 144, largeurFenetre() / 2 + 288, hauteurFenetre() / 2 + 96))
 				{
 					difficulty = 2;
 					difficulteChoisis = true;
 				}
 			}
 
-			else if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu && difficulteChoisis)
+			else if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu && !aGagne && difficulteChoisis)
 			{
 				if (!premierClique) // Initialisation du tableau avec le premier clique
 				{
 					initBomb(plateau, CordClick.x, CordClick.y, difficulty, nbFlag);
 					initNumber(plateau, difficulty);
 					initImage(plateau, difficulty, tailleImage);
-					// afficheTab(plateau, difficulty);
 					premierClique = true;
 				}
 
-				// infoCase(plateau, CordClick.x, CordClick.y);
 				if (plateau[CordClick.x][CordClick.y].flag == 0) // Clique normal en verifiant qu'il ne soit pas sur un drapeau
 				{
 					if (plateau[CordClick.x][CordClick.y].bomb == 0) // Clique meme chose mais pour les bombes
 					{
 						revealer(plateau, CordClick.x, CordClick.y, difficulty);
-						// printf("reveal fait \n");
+
 						nbFlag = tab_difficulty[difficulty];
 						trouveFlag(plateau, difficulty, ptFlag);
-						// printf("Flag fait \n");
 
 						actualiseChaineDrapeau(chaineDrapeau, *ptFlag);
-						// printf("Chaine actualiser \n");
 						aGagne = verifAGagne(plateau, difficulty);
-						// printf("A gagné fait \n\n");
 					}
 					else // Clique sur une bombe
 					{
@@ -201,51 +208,42 @@ void gestionEvenement(EvenementGfx evenement)
 						revealBomb(plateau, difficulty);
 					}
 				}
-				else
-				{
-					printf("Clique sur drapeau \n");
-				}
 			}
-			else
-			{
-				printf("pas dedans \n");
-			}
-			if ((aPerdu || aGagne) && cliqueButton(5, 5, 130, 30)) // Cas du clique sur le boutton recommencer
+			if ((aPerdu || aGagne) && cliqueButton(largeurFenetre() / 2 - 96, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2 - 40, largeurFenetre() / 2 + 96, hauteurFenetre() / 2 - (tailleImage * nbLigne) / 2)) // Cas du clique sur le boutton recommencer
 			{
 				aPerdu = false, premierClique = false, initialisationFaite = false, difficulteChoisis = false, aGagne = false;
+				libereDonneesImageRGB(&imageDefaite);
+				libereDonneesImageRGB(&imageVictoire);
+				libereDonneesImageRGB(&imageFacile);
+				libereDonneesImageRGB(&imageNormal);
+				libereDonneesImageRGB(&imageHard);
 			}
 
 			break;
 		case GaucheRelache:
-			// printf("Bouton gauche relache en : (%d, %d)\n", abscisseSouris(), ordonneeSouris());
+
 			break;
 		case DroiteAppuye:
 			couleurCourante(0, 0, 255);
-			if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu && difficulteChoisis)
+			if (targetMouse(ptCordClick, difficulty, tailleImage) && !aPerdu && difficulteChoisis && premierClique)
 			{
 				flager(plateau, CordClick.x, CordClick.y, ptFlag, tailleImage);
 				actualiseChaineDrapeau(chaineDrapeau, nbFlag);
 			}
 			break;
 		case DroiteRelache:
-			// puts("Bouton droite");
+
 			break;
 		case MilieuAppuye:
 		case MilieuRelache:
-			puts("Bouton milieu");
 			break;
 		case ScrollDown:
-			puts("Scroll down");
-			aGagne = true;
 			break;
 		case ScrollUp:
-			puts("Scroll up");
 			break;
 		case ScrollRight:
-			puts("Scroll right");
 			break;
 		case ScrollLeft:
-			puts("Scroll left");
 			break;
 		}
 		break;
@@ -258,8 +256,6 @@ void gestionEvenement(EvenementGfx evenement)
 
 	case Redimensionnement: // La taille de la fenetre a ete modifie ou on est passe en plein ecran
 		// Donc le systeme nous en informe
-		printf("Largeur : %d\t", largeurFenetre());
-		printf("Hauteur : %d\n", hauteurFenetre());
 		break;
 	}
 }
